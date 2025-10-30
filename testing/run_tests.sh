@@ -42,6 +42,8 @@ show_help() {
     echo "  --local           Run tests locally (requires API to be running)"
     echo "  --smoke           Run only smoke tests"
     echo "  --integration     Run only integration tests"
+    echo "  --audio           Run audio verification tests (validates audio quality)"
+    echo "  --playback        Run playback tests (saves audio files to ./audio_output/)"
     echo "  --coverage        Generate coverage report"
     echo "  --run-to-done     Continue running all tests even if some fail (default: stop on first failure)"
     echo "  --clean           Clean up test containers and reports"
@@ -195,6 +197,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --integration)
             PYTEST_ARGS="$PYTEST_ARGS -m integration"
+            shift
+            ;;
+        --audio)
+            PYTEST_ARGS="$PYTEST_ARGS -m audio"
+            shift
+            ;;
+        --playback)
+            PYTEST_ARGS="$PYTEST_ARGS -m playback"
             shift
             ;;
         --coverage)

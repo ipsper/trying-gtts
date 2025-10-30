@@ -6,6 +6,8 @@ A FastAPI application that uses Google Text-to-Speech (gTTS) to convert text to 
 
 - **FastAPI** with APIRouter for structured API design
 - **gTTS** (Google Text-to-Speech) integration
+- **WebSocket streaming** - Real-time audio streaming in browsers
+- **Interactive web UI** - Built-in player at `/stream-player`
 - **Docker** multi-stage containerized application
 - **Robust input validation** - All text input is validated and sanitized
 - **JSON-safe** - Ensures all input can be properly serialized
@@ -27,12 +29,46 @@ cd trying-gtts
 # The API will be available at:
 # - http://localhost:8088/docs (Swagger UI)
 # - http://localhost:8088/redoc (ReDoc)
+# - http://localhost:8088/stream-player (WebSocket streaming UI)
 # - http://localhost:8088/health (Health check)
 ```
 
 ## Basic Usage
 
-### Generate Speech
+### WebSocket Streaming (Easiest!)
+
+Open the interactive streaming player in your browser:
+
+```
+http://localhost:8088/stream-player
+```
+
+- Type text in the text area
+- Select your language
+- Click "🎤 Speak"
+- Hear it instantly!
+
+See the [WebSocket Streaming Guide](docs/websocket-streaming.md) for API integration.
+
+### Quick Speech Playback (Command Line)
+
+Generate and play speech from terminal:
+
+```bash
+# English (default)
+./scripts/speak.sh "Hello world"
+
+# Swedish
+./scripts/speak.sh "Hej världen" sv
+
+# Other languages
+./scripts/speak.sh "Hola mundo" es
+./scripts/speak.sh "Bonjour le monde" fr
+```
+
+See the [Speech Playback Guide](docs/speak.md) for more options and troubleshooting.
+
+### Generate Speech Files
 
 ```bash
 # English
@@ -69,6 +105,9 @@ curl http://localhost:8088/api/v1/languages
 # Stop container
 ./scripts/stop.sh
 
+# Reinstall after code changes (stop, remove, rebuild, start)
+./scripts/manage.sh reinstall
+
 # View logs
 ./scripts/manage.sh logs
 
@@ -84,6 +123,21 @@ curl http://localhost:8088/api/v1/languages
 # Show help
 ./scripts/manage.sh help
 ```
+
+## Speech Playback
+
+Generate and play audio directly:
+
+```bash
+# Quick playback
+./scripts/speak.sh "Your text here" [language_code]
+
+# Examples
+./scripts/speak.sh "Hello world" en
+./scripts/speak.sh "Hej världen" sv
+```
+
+See the [Speech Playback Guide](docs/speak.md) for detailed documentation.
 
 ## Port Configuration
 
@@ -105,6 +159,8 @@ export GTTS_PORT=9000
 - **[Installation Guide](docs/installation.md)** - Detailed setup instructions for Docker, Docker Compose, and local development
 - **[Configuration Guide](docs/configuration.md)** - Port settings, environment variables, Docker configs, and performance tuning
 - **[API Reference](docs/api-reference.md)** - Complete API endpoint documentation with examples
+- **[WebSocket Streaming Guide](docs/websocket-streaming.md)** - Real-time audio streaming via WebSocket
+- **[Speech Playback Guide](docs/speak.md)** - Generate and play audio with the `speak.sh` script
 - **[Examples](docs/examples.md)** - Usage examples in cURL, Python, JavaScript/Node.js
 - **[Testing Guide](docs/testing.md)** - Comprehensive pytest testing framework and guide
 - **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
@@ -114,6 +170,8 @@ export GTTS_PORT=9000
 | Topic | Description |
 |-------|-------------|
 | [Getting Started](docs/installation.md#quick-start) | Fastest way to run the application |
+| [WebSocket Streaming](docs/websocket-streaming.md) | Real-time audio streaming in browsers |
+| [Speech Playback](docs/speak.md) | Generate and play audio from command line |
 | [Docker Setup](docs/installation.md#using-docker-recommended) | Using Docker and Docker Compose |
 | [Local Development](docs/installation.md#local-development-setup) | Running without Docker (with venv) |
 | [Port Configuration](docs/configuration.md#port-configuration) | Changing default port |
@@ -131,9 +189,11 @@ export GTTS_PORT=9000
 | `/api/v1/` | GET | API information and welcome message |
 | `/api/v1/tts` | POST | Convert text to speech (returns MP3) |
 | `/api/v1/languages` | GET | List supported languages |
+| `/ws/tts` | WebSocket | Real-time audio streaming |
+| `/stream-player` | GET | Interactive WebSocket streaming UI |
 | `/health` | GET | Health check endpoint |
 
-See [API Reference](docs/api-reference.md) for detailed documentation.
+See [API Reference](docs/api-reference.md) and [WebSocket Streaming Guide](docs/websocket-streaming.md) for detailed documentation.
 
 ## Supported Languages
 
@@ -211,8 +271,9 @@ See [API Reference](docs/api-reference.md#language-codes-reference) for complete
 
 ## Interactive Documentation
 
-When the application is running, access the interactive documentation:
+When the application is running, access the interactive tools:
 
+- **WebSocket Streaming UI**: http://localhost:8088/stream-player
 - **Swagger UI**: http://localhost:8088/docs
 - **ReDoc**: http://localhost:8088/redoc
 - **OpenAPI JSON**: http://localhost:8088/openapi.json

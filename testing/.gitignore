@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Pytest cache and reports
+.pytest_cache/
+reports/
+htmlcov/
+.coverage
+
+# Audio output files
+audio_output/*.mp3
+!audio_output/.gitkeep
+

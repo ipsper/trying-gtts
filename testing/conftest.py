@@ -5,6 +5,7 @@ import os
 import pytest
 import requests
 from typing import Generator
+from pathlib import Path
 
 # API Configuration
 # Use host.docker.internal to reach host machine from Docker container
@@ -137,9 +138,42 @@ def pytest_configure(config):
     print(f"{'='*60}\n")
 
 
+@pytest.fixture(scope="function")
+def websocket_url(api_base_url: str) -> str:
+    """
+    WebSocket URL for the gTTS API
+    
+    Converts HTTP URL to WebSocket URL
+    """
+    # Convert http:// to ws://
+    ws_url = api_base_url.replace("http://", "ws://").replace("https://", "wss://")
+    return f"{ws_url}/ws/tts"
+
+
+@pytest.fixture
+def audio_output_dir():
+    """
+    Directory for saving audio files for playback
+    Mounted from host so files can be played locally
+    """
+    output_dir = Path("/app/testing/audio_output")
+    output_dir.mkdir(exist_ok=True)
+    return output_dir
+
+
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run finished"""
     print(f"\n{'='*60}")
     print(f"Test session finished with status: {exitstatus}")
     print(f"{'='*60}\n")
+    
+    # Check if any playback tests were run
+    audio_output = Path("/app/testing/audio_output")
+    if audio_output.exists():
+        audio_files = list(audio_output.glob("*.mp3"))
+        if audio_files:
+            print(f"\n🔊 Audio files saved for playback ({len(audio_files)} files):")
+            print(f"   Location: ./audio_output/")
+            print(f"\n   Run './play_audio.sh' to play them all")
+            print(f"   Or play individually with your audio player\n")
 

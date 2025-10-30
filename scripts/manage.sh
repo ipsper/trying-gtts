@@ -255,6 +255,41 @@ status() {
     fi
 }
 
+# Function to reinstall (stop, remove container, rebuild, start)
+reinstall() {
+    print_info "Reinstalling container (stop, remove, rebuild, start)..."
+    
+    # Stop container if running
+    if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        print_info "Stopping container..."
+        docker stop "${CONTAINER_NAME}"
+    fi
+    
+    # Remove container
+    if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        print_info "Removing old container..."
+        docker rm "${CONTAINER_NAME}"
+        print_success "Old container removed"
+    fi
+    
+    # Remove image to force fresh build
+    if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q "^${IMAGE_NAME}:${IMAGE_TAG}$"; then
+        print_info "Removing old image to force fresh build..."
+        docker rmi "${IMAGE_NAME}:${IMAGE_TAG}"
+        print_success "Old image removed"
+    fi
+    
+    # Rebuild image
+    print_info "Building new image..."
+    build
+    
+    # Start new container
+    print_info "Starting new container..."
+    start
+    
+    print_success "Reinstall complete!"
+}
+
 # Function to rebuild (clean build)
 rebuild() {
     print_info "Rebuilding container from scratch..."
@@ -265,17 +300,18 @@ rebuild() {
 
 # Function to show help
 show_help() {
-    echo "Usage: $0 {build|start|stop|restart|logs|status|clean|rebuild}"
+    echo "Usage: $0 {build|start|stop|restart|reinstall|logs|status|clean|rebuild}"
     echo ""
     echo "Commands:"
-    echo "  build    - Build the Docker image"
-    echo "  start    - Start the container (auto-builds image if not found)"
-    echo "  stop     - Stop the container"
-    echo "  restart  - Restart the container"
-    echo "  logs     - Show container logs (follow mode)"
-    echo "  status   - Show container and image status"
-    echo "  clean    - Remove ALL traces (container, image, volumes)"
-    echo "  rebuild  - Clean, build, and start from scratch"
+    echo "  build      - Build the Docker image"
+    echo "  start      - Start the container (auto-builds image if not found)"
+    echo "  stop       - Stop the container"
+    echo "  restart    - Restart the container"
+    echo "  reinstall  - Stop, remove container, rebuild image, and start (no confirmation)"
+    echo "  logs       - Show container logs (follow mode)"
+    echo "  status     - Show container and image status"
+    echo "  clean      - Remove ALL traces (container, image, volumes)"
+    echo "  rebuild    - Clean, build, and start from scratch (requires confirmation)"
     echo ""
     echo "Configuration:"
     echo "  Default port: ${PORT}"
@@ -284,6 +320,7 @@ show_help() {
     echo "Examples:"
     echo "  $0 build                    # Build the image"
     echo "  $0 start                    # Start on default port (${PORT})"
+    echo "  $0 reinstall                # Quick reinstall after code changes"
     echo "  GTTS_PORT=9000 $0 start     # Start on port 9000"
     echo "  $0 logs                     # View logs"
     echo "  $0 clean                    # Complete cleanup"
@@ -302,6 +339,9 @@ case "$1" in
         ;;
     restart)
         restart
+        ;;
+    reinstall)
+        reinstall
         ;;
     logs)
         logs

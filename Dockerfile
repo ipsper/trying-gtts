@@ -26,6 +26,7 @@ COPY --from=builder /root/.local /root/.local
 
 # Copy application code
 COPY main.py .
+COPY routes/ ./routes/
 
 # Make sure scripts in .local are usable
 ENV PATH=/root/.local/bin:$PATH
@@ -33,8 +34,10 @@ ENV PATH=/root/.local/bin:$PATH
 # Expose port 8000
 EXPOSE 8000
 
-# Create a non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+# Create audio library directory and non-root user
+RUN useradd -m -u 1000 appuser && \
+    mkdir -p /app/audio_library && \
+    chown -R appuser:appuser /app
 
 # Copy dependencies to appuser home
 COPY --from=builder /root/.local /home/appuser/.local
