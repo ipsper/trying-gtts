@@ -50,6 +50,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+testing/reports/
+testing/htmlcov/
 
 # Translations
 *.mo
@@ -205,3 +207,14 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Audio files (TTS generated output)
+*.mp3
+*.wav
+*.ogg
+*.flac
+
+# Docker volumes and data
+*.db
+*.sqlite
+docker-compose.override.yml
